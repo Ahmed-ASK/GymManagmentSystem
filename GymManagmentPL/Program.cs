@@ -1,4 +1,5 @@
 using GymManagementDAL.Data;
+using GymManagementDAL.Data.DataSeed;
 using GymManagementDAL.Repositiry.Classes;
 using GymManagementDAL.Repositiry.Interfaces;
 using GymManagmentBLL.Services.Classes;
@@ -25,6 +26,14 @@ namespace GymManagmentPL
             builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
 
             var app = builder.Build();
+
+
+            #region Data Seeding
+
+            GymDataSeeding.SeedData(app.Services.CreateScope().ServiceProvider.GetRequiredService<GymDbContext>());
+
+            #endregion
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
