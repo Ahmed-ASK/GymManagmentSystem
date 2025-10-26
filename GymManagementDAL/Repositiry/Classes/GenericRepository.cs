@@ -35,5 +35,10 @@ namespace GymManagementDAL.Repositiry.Classes
             _dbContext.Set<TEntity>().Update(entity);
             return _dbContext.SaveChanges();
         }
+
+        public bool Exists(Func<TEntity, bool> predicate)
+        {
+            return _dbContext.Set<TEntity>().Any(predicate);
+        }
     }
 }

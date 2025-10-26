@@ -1,83 +1,73 @@
-﻿using GymManagementDAL.Entities;
-using GymManagementDAL.Repositiry.Interfaces;
+﻿using AutoMapper;
+using GymManagementBLL.Services.Interfaces;
+using GymManagementBLL.ViewModels.PlanViewModels;
+using GymManagementDAL.Entities;
+using GymManagementDAL.Repositories.Interfaces;
 using GymManagmentBLL.Services.Interfaces;
-using GymManagmentBLL.ViewModels.PlanViewModels;
 
-namespace GymManagmentBLL.Services.Classes
+namespace GymManagementBLL.Services.Classes
 {
-    public class PlanService(IUnitOfWork unitOfWork) : IPlanService
+    public class PlanService : IPlanService
     {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+
+        public PlanService(IUnitOfWork unitOfWork, IMapper mapper)
+        {
+            _unitOfWork = unitOfWork;
+            _mapper = mapper;
+        }
         public IEnumerable<PlanViewModel> GetAllPlans()
         {
-            var plans = unitOfWork.GetRepository<Plan>().GetAll();
-            if (plans is null || !plans.Any()) return [];
-
-            return plans.Select(p => new PlanViewModel()
-            {
-                Id = p.Id,
-                Name = p.Name,
-                Description = p.Description,
-                DurationDays = p.DurationDays,
-                IsActive = p.IsActive,
-                Price = p.Price,
-            });
+            var plans = _unitOfWork.GetRepository<Plan>().GetAll();
+            if (!plans.Any()) return [];
+            return _mapper.Map<IEnumerable<PlanViewModel>>(plans);
         }
-
-        public PlanViewModel GetPlanById(int id)
+        public PlanViewModel? GetPlanById(int planId)
         {
-           var plan = unitOfWork.GetRepository<Plan>().GetById(id);
-            if (plan is null) return null!;
-            return new PlanViewModel()
-            {
-                Id = plan.Id,
-                Name = plan.Name,
-                Description = plan.Description,
-                DurationDays = plan.DurationDays,
-                IsActive = plan.IsActive,
-                Price = plan.Price,
-            };
-        }
+            var plan = _unitOfWork.GetRepository<Plan>().GetById(planId);
 
+            if (plan == null)
+                return null;
+
+            return _mapper.Map<PlanViewModel>(plan);
+        }
         public UpdatePlanViewModel? GetPlanToUpdate(int planId)
         {
-            var plan = unitOfWork.GetRepository<Plan>().GetById(planId);
-            if (plan is null || plan.IsActive == false || HasActiveMemberships(planId)) return null!;
-            return new UpdatePlanViewModel() 
-            {
-                Description = plan.Description,
-                DurationDays = plan.DurationDays,
-                PlanName = plan.Name,
-                Price = plan.Price
-            };
-        }
+            var plan = _unitOfWork.GetRepository<Plan>().GetById(planId);
 
-        public bool ToggleStatus(int planId)
+            if (plan == null || plan.IsActive == false || HasActiveMemberShips(planId))
+                return null;
+
+            return _mapper.Map<UpdatePlanViewModel>(plan);
+        }
+        public bool Activate(int PlanId)
         {
-            var repo = unitOfWork.GetRepository<Plan>();
-            var plan = repo.GetById(planId);
-            if (plan is null || HasActiveMemberships(planId)) return false;
-            plan.IsActive = !plan.IsActive;
-            plan.UpdatedAt = DateTime.Now;
             try
             {
-                repo.Update(plan);
-                return unitOfWork.SaveChanges() > 0;
+                var Repo = _unitOfWork.GetRepository<Plan>();
+                var Plan = Repo.GetById(PlanId);
+                if (Plan is null || HasActiveMemberShips(PlanId)) return false;
+                Plan.IsActive = Plan.IsActive == true ? false : true;
+                Plan.UpdatedAt = DateTime.Now;
+                Repo.Update(Plan);
+                return _unitOfWork.SaveChanges() > 0;
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
         }
-
-        public bool UpdatePlan(int planId, UpdatePlanViewModel updatedPlan)
+        public bool UpdatePlan(int Id, UpdatePlanViewModel updatePlanViewModel)
         {
             try
             {
-                var plan = unitOfWork.GetRepository<Plan>().GetById(planId);
-                if (plan is null || HasActiveMemberships(planId)) return false;
-                (plan.Description, plan.Price, plan.DurationDays, plan.UpdatedAt) = (updatedPlan.Description, updatedPlan.Price, updatedPlan.DurationDays, DateTime.Now);
-                unitOfWork.GetRepository<Plan>().Update(plan);
-                return unitOfWork.SaveChanges() > 0;
+                var Repo = _unitOfWork.GetRepository<Plan>();
+                var Plan = Repo.GetById(Id);
+                if (Plan is null || HasActiveMemberShips(Id)) return false;
+                _mapper.Map(updatePlanViewModel, Plan);
+                Repo.Update(Plan);
+                return _unitOfWork.SaveChanges() > 0;
             }
             catch
             {
@@ -85,10 +75,15 @@ namespace GymManagmentBLL.Services.Classes
             }
         }
 
-        private bool HasActiveMemberships(int planId)
+        #region Helper Methods
+        private bool HasActiveMemberShips(int Id)
         {
-            var activeMemberships = unitOfWork.GetRepository<Membership>().GetAll(x => x.PlanId == planId && x.Status == "Active");
-            return activeMemberships.Any();
+            var activeMemberships = _unitOfWork.GetRepository<Membership>().GetAll(m => m.PlanId == Id && m.Status == "Active");
+            if (activeMemberships.Any())
+                return true;
+            else
+                return false;
         }
+        #endregion
     }
 }

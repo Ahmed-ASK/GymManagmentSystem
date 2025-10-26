@@ -1,27 +1,30 @@
 ﻿using GymManagementDAL.Data;
+using GymManagementDAL.Entities;
 using GymManagementDAL.Entities.Base;
+using GymManagementDAL.Repositiry.Classes;
 using GymManagementDAL.Repositiry.Interfaces;
 using GymManagementDAL.Repositories.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace GymManagementDAL.Repositiry.Classes
+namespace GymManagementDAL.Repositories.Classes
 {
     public class UnitOfWork : IUnitOfWork
     {
+        public IMembershipRepository MembershipRepository { get; }
         public ISessionRepository SessionRepository { get; }
 
+        public IMemberSessionRepository MemberSessionRepository { get; }
 
         private readonly Dictionary<string, object> repositories = [];
         private readonly GymDbContext _dbContext;
         public UnitOfWork(GymDbContext dbContext,
-            ISessionRepository sessionRepository)
+            IMembershipRepository membershipRepository,
+            ISessionRepository sessionRepository,
+            IMemberSessionRepository bookingRepository)
         {
             _dbContext = dbContext;
+            MembershipRepository = membershipRepository;
             SessionRepository = sessionRepository;
+            MemberSessionRepository = bookingRepository;
         }
 
 

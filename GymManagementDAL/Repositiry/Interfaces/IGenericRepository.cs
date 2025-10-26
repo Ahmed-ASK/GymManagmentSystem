@@ -15,5 +15,6 @@ namespace GymManagementDAL.Repositiry.Interfaces
         int Add(TEntity entity);
         int Update(TEntity entity);
         int Delete(TEntity entity);
+        bool Exists(Func<TEntity, bool> predicate);
     }
 }

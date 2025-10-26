@@ -1,9 +1,10 @@
 ﻿using GymManagementDAL.Entities.User;
 using GymManagementDAL.Repositiry.Interfaces;
 using GymManagmentBLL.Services.Interfaces;
-using GymManagmentBLL.ViewModels.MemberViewModel;
 using GymManagementDAL.Entities.Health;
 using GymManagementDAL.Entities;
+using GymManagementBLL.ViewModels.MemberViewModel;
+using GymManagementDAL.Repositories.Interfaces;
 
 namespace GymManagmentBLL.Services.Classes
 {
@@ -30,9 +31,9 @@ namespace GymManagmentBLL.Services.Classes
                     },
                     HealthRecord = new HealthRecord()
                     {
-                        Hight = createdMember.HealthRecord.Hight,
-                        Weight = createdMember.HealthRecord.Weight,
-                        BloodType = createdMember.HealthRecord.BloodType,
+                        Hight = createdMember.HealthRecordViewModel.Height,
+                        Weight = createdMember.HealthRecordViewModel.Weight,
+                        BloodType = createdMember.HealthRecordViewModel.BloodType,
                     }
                 };
                 return _unitOfWork.GetRepository<Member>().Add(memberToAdd) > 0;
@@ -91,7 +92,7 @@ namespace GymManagmentBLL.Services.Classes
 
             return new HealthRecordViewModel()
             {
-                Hight = record.Hight,
+                Height = record.Hight,
                 Weight = record.Weight,
                 BloodType = record.BloodType,
                 Note = record.Note,
