@@ -1,7 +1,12 @@
+using GymManagementBLL;
+using GymManagementBLL.Services.Classes;
+using GymManagementBLL.Services.Interfaces;
 using GymManagementDAL.Data;
 using GymManagementDAL.Data.DataSeed;
 using GymManagementDAL.Repositiry.Classes;
 using GymManagementDAL.Repositiry.Interfaces;
+using GymManagementDAL.Repositories.Classes;
+using GymManagementDAL.Repositories.Interfaces;
 using GymManagmentBLL.Services.Classes;
 using GymManagmentBLL.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -18,10 +23,13 @@ namespace GymManagmentPL
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<GymDbContext>(options => 
             {
-                options.UseSqlServer(builder.Configuration["DefaultConnection"]);
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
+            builder.Services.AddAutoMapper(M => M.AddProfile(new MappingProfile()));
             builder.Services.AddScoped<IMemberService , MemberService>();
             builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+            builder.Services.AddScoped<ISessionService, SessionService>();
+            builder.Services.AddScoped<ISessionRepository, SessionRepository>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
 

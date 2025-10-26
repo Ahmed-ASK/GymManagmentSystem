@@ -1,6 +1,7 @@
 ﻿using GymManagementDAL.Data;
 using GymManagementDAL.Entities.Base;
 using GymManagementDAL.Repositiry.Interfaces;
+using GymManagementDAL.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,23 +10,32 @@ using System.Threading.Tasks;
 
 namespace GymManagementDAL.Repositiry.Classes
 {
-    public class UnitOfWork(GymDbContext _dbContext) : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
-        private readonly Dictionary<Type, object> _repositories = new();
-        public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity, new()
-        {
-            var EntityType = typeof(TEntity);
-            if (_repositories.TryGetValue(EntityType, out var Repo)) 
-                return (IGenericRepository<TEntity>) Repo;
+        public ISessionRepository SessionRepository { get; }
 
-            var newRepo = new GenericRepository<TEntity>(_dbContext);
-            _repositories[EntityType] = newRepo;
-            return newRepo;
+
+        private readonly Dictionary<string, object> repositories = [];
+        private readonly GymDbContext _dbContext;
+        public UnitOfWork(GymDbContext dbContext,
+            ISessionRepository sessionRepository)
+        {
+            _dbContext = dbContext;
+            SessionRepository = sessionRepository;
+        }
+
+
+        public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity , new()
+        {
+            var typeName = typeof(TEntity).Name;
+            if (repositories.TryGetValue(typeName, out object? value))
+                return (IGenericRepository<TEntity>)value;
+            var Repo = new GenericRepository<TEntity>(_dbContext);
+            repositories[typeName] = Repo;
+            return Repo;
         }
 
         public int SaveChanges()
-        {
-            return _dbContext.SaveChanges();
-        }
+        => _dbContext.SaveChanges();
     }
 }

@@ -9,10 +9,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GymManagementDAL.Data.Migrations
+namespace GymManagementDAL.Migrations
 {
     [DbContext(typeof(GymDbContext))]
-    [Migration("20251008133143_InitialCreate")]
+    [Migration("20251026101150_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -214,7 +214,7 @@ namespace GymManagementDAL.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("GymManagementDAL.Entities.User.Members", b =>
+            modelBuilder.Entity("GymManagementDAL.Entities.User.Member", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -331,7 +331,7 @@ namespace GymManagementDAL.Data.Migrations
 
             modelBuilder.Entity("GymManagementDAL.Entities.Health.HealthRecord", b =>
                 {
-                    b.HasOne("GymManagementDAL.Entities.User.Members", null)
+                    b.HasOne("GymManagementDAL.Entities.User.Member", null)
                         .WithOne("HealthRecord")
                         .HasForeignKey("GymManagementDAL.Entities.Health.HealthRecord", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,7 +340,7 @@ namespace GymManagementDAL.Data.Migrations
 
             modelBuilder.Entity("GymManagementDAL.Entities.MemberSession", b =>
                 {
-                    b.HasOne("GymManagementDAL.Entities.User.Members", "Members")
+                    b.HasOne("GymManagementDAL.Entities.User.Member", "Member")
                         .WithMany("MemberSessions")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -352,14 +352,14 @@ namespace GymManagementDAL.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Members");
+                    b.Navigation("Member");
 
                     b.Navigation("Session");
                 });
 
             modelBuilder.Entity("GymManagementDAL.Entities.Membership", b =>
                 {
-                    b.HasOne("GymManagementDAL.Entities.User.Members", "Members")
+                    b.HasOne("GymManagementDAL.Entities.User.Member", "Member")
                         .WithMany("Memberships")
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -371,7 +371,7 @@ namespace GymManagementDAL.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Members");
+                    b.Navigation("Member");
 
                     b.Navigation("Plan");
                 });
@@ -395,7 +395,7 @@ namespace GymManagementDAL.Data.Migrations
                     b.Navigation("SessionTrainer");
                 });
 
-            modelBuilder.Entity("GymManagementDAL.Entities.User.Members", b =>
+            modelBuilder.Entity("GymManagementDAL.Entities.User.Member", b =>
                 {
                     b.OwnsOne("GymManagementDAL.Entities.User.Address", "Address", b1 =>
                         {
@@ -484,7 +484,7 @@ namespace GymManagementDAL.Data.Migrations
                     b.Navigation("MemberSessions");
                 });
 
-            modelBuilder.Entity("GymManagementDAL.Entities.User.Members", b =>
+            modelBuilder.Entity("GymManagementDAL.Entities.User.Member", b =>
                 {
                     b.Navigation("HealthRecord")
                         .IsRequired();
